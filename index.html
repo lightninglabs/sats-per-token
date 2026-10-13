@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en" data-theme-pref="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sats Per Token</title>
+<meta name="description" content="Inference sold by the token and settled in sats over Lightning. No accounts, no buyer-side API keys, no cards.">
+<meta name="color-scheme" content="dark light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307090b'/%3E%3Cpath d='M6 22 L16 8 L26 22 Z' fill='none' stroke='%23ffc21a' stroke-width='2.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+<!-- Pinned three.js. The WebGPU build is only fetched when navigator.gpu exists; otherwise the plain WebGL build loads. -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.webgpu.js"
+} }
+</script>
+<script>
+/* Apply a stored theme choice before first paint. */
+try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Sats Per Token, top of page">sats<b>/</b>token</a>
+    <nav aria-label="Sections">
+      <a href="#problem">problem</a>
+      <a href="#how">how it works</a>
+      <a href="#metering">metering</a>
+      <a href="#wavelength">wavelength</a>
+      <a href="#agents">agents</a>
+      <a href="#run">run it</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle light and dark theme">theme</button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ====================================================== HERO / THE METER -->
+<section class="hero" aria-labelledby="h-hero">
+  <div class="wrap hero-grid">
+    <div class="hero-l">
+      <p class="kicker">inference, metered</p>
+      <h1 id="h-hero">Sats<span class="slash">/</span>token</h1>
+      <p class="sub"><strong>Sell inference by the token, paid in sats (Bitcoin).</strong> The payment is final in seconds, so there are no accounts, no buyer-side API keys, and no cards.</p>
+      <div class="cta">
+        <a class="btn primary" href="#run">Run it yourself</a>
+        <a class="btn" href="#how">How it works</a>
+      </div>
+
+      <div class="panel prompt-box" id="operator">
+        <div class="panel-h"><span>operator console</span><span class="r">simulated model</span></div>
+        <div class="panel-b">
+          <label for="prompt" class="sr-only">Prompt</label>
+          <textarea id="prompt" maxlength="1600" spellcheck="false" aria-describedby="estLine">Explain why a chargeback cannot un-run a GPU.</textarea>
+          <div class="samples" role="group" aria-label="Sample prompts">
+            <button class="chip" type="button" data-sample="0">chargeback vs GPU</button>
+            <button class="chip" type="button" data-sample="1">agent self-funding</button>
+            <button class="chip" type="button" data-sample="2">one-line summary of 402</button>
+          </div>
+          <div class="params">
+            <div><label for="rateIn">in msat/tok</label><input id="rateIn" type="number" min="1" max="50" step="1" value="1"></div>
+            <div><label for="rateOut">out msat/tok</label><input id="rateOut" type="number" min="1" max="100" step="1" value="2"></div>
+            <div><label for="maxTok">max_tokens</label>
+              <select id="maxTok"><option>64</option><option>128</option><option selected>256</option></select></div>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="runBtn" type="button">Run completion</button>
+            <button class="btn sm" id="resetBtn" type="button">Reset meter</button>
+            <span class="est" id="estLine" aria-live="polite">input <b id="estTok">0</b> tok · <b class="s" id="estMsat">0</b> msat</span>
+          </div>
+          <div class="out-box" id="outBox" aria-live="off" aria-label="Simulated completion output"><span class="dim">output appears here</span></div>
+          <p class="hint">No model runs in this page. Token counts are an estimate (about 4 characters each); a real seller bills the usage the upstream reports. Demo bundle is 1,000 tokens (a real bundle is 1,000,000). Press Ctrl+Enter to run.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-r stage-wrap">
+      <div class="panel">
+        <div class="stage-top"><span><b>model</b> upstream</span><span><b>aperture</b> 402 + meter</span><span><b>agent</b> buyer</span></div>
+        <div class="stage" id="stage" data-phase="idle" role="img" aria-label="Live meter. Tokens stream from the model to the buyer while sats flow back to the seller. The scene reacts to the console on the left.">
+          <div class="grid-bg"></div>
+          <canvas id="meterCanvas" aria-hidden="true"></canvas>
+          <div class="lane in"><i>prompt</i></div>
+          <div class="lane out"><i>completion</i></div>
+          <div class="lane sat"><i>sats</i></div>
+          <div class="pillar m" data-l="MODEL"></div>
+          <div class="gate"></div>
+          <div class="pillar b" data-l="AGENT"></div>
+          <div class="stage-banner" id="banner">idle, no credential</div>
+          <div class="stage-fallback" id="renderTag"></div>
+        </div>
+        <div class="readouts" aria-label="Meter readouts">
+          <div class="ro t"><div class="l">tokens in</div><div class="v" id="roIn">0</div></div>
+          <div class="ro t"><div class="l">tokens out</div><div class="v" id="roOut">0</div></div>
+          <div class="ro s"><div class="l">metered</div><div class="v"><span id="roMsat">0</span><small>msat</small></div></div>
+          <div class="ro"><div class="l">bundles bought</div><div class="v" id="roBundles">0</div></div>
+        </div>
+        <div class="bundle">
+          <div class="bundle-h"><span>bundle balance <b id="balTxt">no credential</b></span><span id="usdTxt">≈ $0.00000000 spent</span></div>
+          <div class="bar" id="bar" role="progressbar" aria-label="Bundle balance" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="rem" id="barRem" style="width:0"></div>
+            <div class="pend" id="barPend" style="width:0;left:0"></div>
+            <div class="resv" id="barResv" style="width:0;left:0;display:none"></div>
+          </div>
+          <div class="legend"><span class="a"><i></i>remaining</span><span class="b"><i></i>metered, not yet debited</span><span class="c"><i></i>reservation</span></div>
+        </div>
+        <div class="rpcs" id="rpcs" aria-label="Price server calls">
+          <span class="rpc" data-rpc="GetPrice">GetPrice</span>
+          <span class="rpc" data-rpc="ChallengeMinted">ChallengeMinted</span>
+          <span class="rpc" data-rpc="AuthorizeRequest">AuthorizeRequest</span>
+          <span class="rpc" data-rpc="ReportUsage">ReportUsage</span>
+        </div>
+        <div class="log" id="log" role="log" aria-label="Protocol log"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== PROBLEM -->
+<section id="problem" aria-labelledby="h-problem">
+  <div class="wrap">
+    <p class="kicker">01 / the problem</p>
+    <h2 id="h-problem">A token is irreversible. A card payment is not.</h2>
+    <p class="lede">Generating a token draws joules from the grid and turns them into heat and part of a response. No message from a card network can reach back and recover that energy. So <strong>if you sell inference on cards, you are a lender, not a merchant.</strong></p>
+
+    <div class="cols two" style="margin-top:36px">
+      <div>
+        <p>You allocate scarce GPU time now, for an amount you do not know in advance, and learn somewhere between 60 and 120 days later whether you were paid. Each familiar barrier is an attempt to underwrite that loan, and the fraud you fail to catch is the default rate.</p>
+        <ol class="ledger" aria-label="Barriers that sellers put in front of buyers">
+          <li><div><b>Sign-up wall</b><span>An account before the first token.</span></div></li>
+          <li><div><b>Fraud checks</b><span>Invasive verification for a few cents of usage.</span></div></li>
+          <li><div><b>Minimum top-up</b><span>You wanted to try a model, not prepay a month.</span></div></li>
+          <li><div><b>Unsupported countries</b><span>The rail decides who may buy.</span></div></li>
+          <li><div><b>Keys tied to a human</b><span>Someone who can be charged later.</span></div></li>
+        </ol>
+      </div>
+      <div>
+        <!-- TODO: the $323M figure is still being confirmed. Swap the image and the caption together. -->
+        <figure id="fraud-figure">
+          <a href="https://x.com/thdxr/status/2092238606987370884"><img src="dax-stripe-fraud.png" width="900" alt="Tweet from Dax (@thdxr), Aug 25, 2026: Stripe has blocked 300M USD worth of fraud for OpenCode in the past few days, with a dashboard showing 323,033,617.04 USD blocked and 8,254,735.82 USD failed." loading="lazy"></a>
+          <figcaption>A public screenshot from OpenCode's CEO: Stripe's dashboard showing blocked fraud over a few days. Figure still being confirmed.</figcaption>
+        </figure>
+        <p class="pull" style="margin-top:22px">Fallible defenses stand between <em>a payment that can be undone</em> and <em>a product that cannot</em>.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:84px; max-width:34ch">Pick a rail whose properties match the product.</h3>
+    <div class="facts">
+      <div class="fact"><div class="big">seconds</div><h3>Final settlement</h3><p>A payment settles within seconds, and settles finally. A preimage either exists or it does not. There is nothing to charge back.</p></div>
+      <div class="fact"><div class="big">0 identity</div><h3>No identity attached</h3><p>Card fraud works because a payment is a claim on a person, which can be borrowed or stolen. A Lightning payment is not a claim on anyone.</p></div>
+      <div class="fact"><div class="big">1 msat</div><h3>Tiny amounts</h3><p>The unit is the millisatoshi, 1/1000 of a sat (about $0.00000079 at the time of writing). You can price a single token.</p></div>
+    </div>
+
+    <div class="tl panel" id="timeline">
+      <div class="panel-h"><span>scrubber / tokens served on day 0</span><span class="r">card vs lightning, day 0 to day 120</span></div>
+      <div class="panel-b">
+        <div class="tl-ctl">
+          <div class="tl-day" aria-hidden="true"><span id="tlDay">0</span> <small>days</small></div>
+          <button class="btn sm" id="tlPlay" type="button">Play</button>
+          <label class="chk"><input type="checkbox" id="tlCB"> simulate a chargeback (illustrative, day 90)</label>
+        </div>
+        <label for="tlRange" class="sr-only">Days since the tokens were served</label>
+        <input type="range" id="tlRange" min="0" max="120" step="1" value="0" aria-valuetext="day 0">
+        <div class="tracks">
+          <div class="track">
+            <div class="nm"><b>Card</b><span>reversible for 60 to 120 days</span></div>
+            <div class="tbar"><div class="seg unk"></div><div class="seg late"></div><div class="reverse" id="tlRev"></div><div class="phead" data-ph></div></div>
+          </div>
+          <div class="track">
+            <div class="nm"><b>Lightning</b><span>final within seconds</span></div>
+            <div class="tbar"><div class="seg fin"></div><div class="seg after"></div><div class="phead" data-ph></div></div>
+          </div>
+          <div class="axis" aria-hidden="true"><span>day 0</span><span>day 30</span><span>day 60</span><span>day 90</span><span>day 120</span></div>
+        </div>
+        <div class="tl-read" aria-live="polite">
+          <div class="tl-card card"><h4>Card</h4><p id="tlCard"></p></div>
+          <div class="tl-card ln"><h4>Lightning</h4><p id="tlLn"></p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== HOW IT WORKS -->
+<section id="how" aria-labelledby="h-how">
+  <div class="wrap">
+    <p class="kicker">02 / how it works</p>
+    <h2 id="h-how">The payment is the credential.</h2>
+    <p class="lede">The server answers an unpaid request with <strong>HTTP 402</strong>: a macaroon that commits to an invoice's payment hash, plus the invoice. Paying reveals the preimage, and macaroon plus preimage is the credential. A valid credential cannot exist without settlement. No sign-up, no key issuance, no account.</p>
+
+    <div class="hs">
+      <div class="panel" id="hsPanel">
+        <div class="panel-h"><span>transcript</span><span class="r">illustrative header shapes, not a wire capture</span></div>
+        <div class="panel-b" style="padding-bottom:10px"><div class="steps" id="hsSteps" role="group" aria-label="Handshake steps"></div></div>
+        <pre class="tx mono" id="hsTx" tabindex="0" aria-label="HTTP transcript"></pre>
+        <div class="tx-ctl">
+          <button class="btn sm" id="hsPrev" type="button">Back</button>
+          <button class="btn sm primary" id="hsNext" type="button">Next step</button>
+          <button class="btn sm" id="hsReset" type="button">Restart</button>
+          <div class="door" role="group" aria-label="Which offer the buyer takes">
+            <button type="button" id="doorL" aria-pressed="true">L402</button>
+            <button type="button" id="doorP" aria-pressed="false">Payment</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel annot">
+        <div class="panel-h"><span id="hsWho">buyer to aperture</span><span class="r" id="hsCount">1 / 6</span></div>
+        <div class="annot-body" aria-live="polite">
+          <h3 id="hsTitle"></h3>
+          <div id="hsBody"></div>
+          <div class="rpc-row" id="hsRpc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmp-scroll">
+      <table class="cmp">
+        <caption>One 402, two doors. The buyer picks whichever it speaks.</caption>
+        <thead><tr><th></th><th class="col-l">L402</th><th class="col-m">Payment HTTP Authentication Scheme (MPP)</th></tr></thead>
+        <tbody>
+          <tr><th>Spec</th><td>L402 on HTTP 402, <a href="https://docs.lightning.engineering/the-lightning-network/l402">docs</a>. A macaroon bound to the invoice's payment hash.</td><td><code>draft-httpauth-payment-00</code>, an IETF <a href="https://datatracker.ietf.org/doc/draft-httpauth-payment/">draft</a> co-authored by Stripe and Tempo. Nearly the same shape.</td></tr>
+          <tr><th>Credential</th><td>Macaroon plus the preimage of the invoice you paid.</td><td>A payload carrying the preimage, in an <code>Authorization: Payment</code> header.</td></tr>
+          <tr><th>Meter key</th><td>The random token ID inside the macaroon.</td><td>The payment hash, derived from the preimage itself. Each 402 books one bundle per door; only the paid one is drawn down.</td></tr>
+          <tr><th>Intents</th><td>Pay once, present the same credential until the bundle refuses.</td><td><code>charge</code>: pay per challenge. <code>session</code>: a deposit, bearer requests against a running balance, a metered refund on close.</td></tr>
+          <tr><th>Aperture</th><td>Offered on every 402.</td><td>Offered alongside L402 with <code>--authenticator.enablempp</code>; sessions with <code>--authenticator.enablesessions</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">pi-402 takes a Payment offer when the seller makes one and falls back to L402. It accepts the <code>charge</code> intent by default; <code>session</code> needs a return-invoice minter that the swap-backed wallet cannot supply yet.</p>
+  </div>
+</section>
+
+<!-- ====================================================== METERING -->
+<section id="metering" aria-labelledby="h-meter">
+  <div class="wrap">
+    <p class="kicker">03 / metering</p>
+    <h2 id="h-meter">Charge for the thing that varies.</h2>
+    <p class="lede">One request costs the seller a few dozen tokens, the next a few thousand, and the seller only learns which once the response is served. So the <strong>payment happens once, up front, for a bundle</strong>, and the <strong>accounting happens per request</strong>, from the usage the upstream actually reported. At 1 msat per input token and 2 msat per output token, that is roughly $0.79 / $1.57 per million tokens at the time of writing.</p>
+
+    <p class="hint" style="margin-top:18px">The four calls below are the same chips that light up in the meter at the top of the page. Run a completion there and watch them fire.</p>
+    <div class="rpc-table" id="rpcTable" role="list">
+      <div class="rpc-item" role="listitem" data-rpc="GetPrice"><span class="n">01</span><span class="nm">GetPrice</span><span class="when">Before aperture mints a 402</span><span class="does">Quotes the bundle price for this request's model.</span></div>
+      <div class="rpc-item" role="listitem" data-rpc="ChallengeMinted"><span class="n">02</span><span class="nm">ChallengeMinted</span><span class="when">As the 402 is minted</span><span class="does">Books a bundle against the credential's key, so a balance exists before the payment arrives.</span></div>
+      <div class="rpc-item" role="listitem" data-rpc="AuthorizeRequest"><span class="n">03</span><span class="nm">AuthorizeRequest</span><span class="when">On each authenticated request</span><span class="does">Admits or refuses against the balance, and reserves an estimate (the request's <code>max_tokens</code> when it names one).</span></div>
+      <div class="rpc-item" role="listitem" data-rpc="ReportUsage"><span class="n">04</span><span class="nm">ReportUsage</span><span class="when">When the response finishes</span><span class="does">Debits the usage the upstream reported, rounded up, and releases the reservation.</span></div>
+    </div>
+
+    <div class="life">
+      <div class="life-card"><div class="no">born</div><p>A bundle is born when the 402 is minted, not when it is paid. An unpaid booking expires after ten minutes.</p></div>
+      <div class="life-card"><div class="no">reserved</div><p>The reservation stops ten concurrent requests from each being admitted against the same last thousand tokens.</p></div>
+      <div class="life-card"><div class="no">debited</div><p>The debit is weighted by direction when the prompt and completion split is known, so output-heavy work pays the output rate.</p></div>
+      <div class="life-card"><div class="no">exhausted</div><p>A request that would overdraw gets a fresh 402 naming the next bundle. Exhaustion, not the credential, ends a bundle.</p></div>
+    </div>
+
+    <h3 style="margin-top:72px; max-width:30ch">Aperture ships <code class="mono" style="font-size:.9em">meterd</code>. A real seller wants <a href="https://github.com/lightninglabs/lightmeter" style="text-underline-offset:4px">lightmeter</a>.</h3>
+    <p class="lede" style="margin-top:14px"><code>meterd</code> is the minimal price server: a JSON file of per-model rates. Lightmeter is the reference daemon for a real seller. It knows what each model costs, reads the upstream provider's catalog, tracks the BTC/USD rate, converts dollars per million tokens to msat per token, adds an optional margin, and keeps a SQLite database with an append-only accounting ledger for reconciliation. Try the conversion with the values from the regtest demo config.</p>
+
+    <div class="panel calc" id="calc">
+      <div class="panel-h"><span>lightmeter pricing, $/Mtok to msat/token</span><span class="r">regtest demo values</span></div>
+      <div class="calc-grid">
+        <div class="calc-in">
+          <div><label for="cModel">model</label>
+            <select id="cModel">
+              <option value="zai-org/GLM-4.7|0.60|2.20">zai-org/GLM-4.7 ($0.60 / $2.20)</option>
+              <option value="zai-org/GLM-5.2|1.40|4.40">zai-org/GLM-5.2 ($1.40 / $4.40)</option>
+              <option value="moonshotai/Kimi-K3|3.00|15.00" selected>moonshotai/Kimi-K3 ($3.00 / $15.00)</option>
+            </select></div>
+          <div><label for="cMargin">margin percent: <span id="cMarginV" class="sat">25</span></label><input type="range" id="cMargin" min="0" max="100" step="1" value="25"></div>
+          <div><label for="cBtc">btc/usd (pinned rate)</label><input type="number" id="cBtc" min="1000" step="1000" value="100000"></div>
+          <div><label for="cBundle">bundletokens</label><input type="number" id="cBundle" min="1000" step="1000" value="1000000"></div>
+        </div>
+        <div class="calc-out">
+          <table>
+            <thead><tr><th></th><th style="text-align:right">input</th><th style="text-align:right">output</th></tr></thead>
+            <tbody>
+              <tr><th>upstream $/Mtok</th><td id="cUsdI"></td><td id="cUsdO"></td></tr>
+              <tr><th>msat/token, raw</th><td id="cRawI"></td><td id="cRawO"></td></tr>
+              <tr><th>with margin</th><td id="cMarI"></td><td id="cMarO"></td></tr>
+              <tr><th>rounded up (quoted rate)</th><td class="hl" id="cRndI"></td><td class="hl" id="cRndO"></td></tr>
+            </tbody>
+          </table>
+          <div class="bundle-line"><span class="dim">one bundle, blended rate</span><b><span id="cSats"></span> <small class="dim" style="font-size:14px">sats</small></b></div>
+          <div class="eq" id="cEq"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== WAVELENGTH -->
+<section id="wavelength" aria-labelledby="h-wl">
+  <div class="wrap">
+    <p class="kicker">04 / wavelength</p>
+    <h2 id="h-wl">No node. No channels. Nothing to keep online.</h2>
+    <p class="lede">Running a Lightning node means channels, inbound liquidity, and a process that has to stay online. Too much to ask of a seller who wants to sell tokens, and far more than you would ask of a wallet living inside a coding agent. <a href="https://lightning.engineering/posts/2026-07-21-wavelength-launch/">Wavelength</a> is an Ark wallet that pays a BOLT11 invoice through a swap server, so both sides skip it.</p>
+
+    <svg class="wl-svg" viewBox="0 0 960 250" role="img" aria-labelledby="wlT wlD">
+      <title id="wlT">Wavelength payment path</title>
+      <desc id="wlD">The buyer funds the agent wallet from a phone. The agent pays from its Ark balance through the Wavelength swap server over Lightning. Aperture's seller wallet is credited with inbound liquidity from the swap server. Neither side runs channels or a node.</desc>
+      <rect class="node" x="10" y="80" width="160" height="90" rx="3"/>
+      <text x="90" y="118" text-anchor="middle" font-size="14">phone</text><text class="small" x="90" y="138" text-anchor="middle">Wavelength app</text>
+      <rect class="node hot" x="250" y="80" width="170" height="90" rx="3"/>
+      <text x="335" y="118" text-anchor="middle" font-size="14">agent wallet</text><text class="small" x="335" y="138" text-anchor="middle">Ark, in-process</text>
+      <rect class="node" x="500" y="80" width="170" height="90" rx="3"/>
+      <text x="585" y="118" text-anchor="middle" font-size="14">swap server</text><text class="small" x="585" y="138" text-anchor="middle">Ark to Lightning</text>
+      <rect class="node hot" x="750" y="80" width="200" height="90" rx="3"/>
+      <text x="850" y="118" text-anchor="middle" font-size="14">aperture</text><text class="small" x="850" y="138" text-anchor="middle">seller wallet, no node</text>
+      <path class="wire" d="M170 125 H250"/><path class="flow" d="M170 125 H250"/>
+      <path class="wire" d="M420 125 H500"/><path class="flow" d="M420 125 H500"/>
+      <path class="wire" d="M670 125 H750"/><path class="flow" d="M670 125 H750"/>
+      <text class="small" x="210" y="108" text-anchor="middle">/fund</text>
+      <text class="small" x="460" y="108" text-anchor="middle">pay invoice</text>
+      <text class="small" x="710" y="108" text-anchor="middle">Lightning</text>
+      <path class="wire" d="M850 170 V215 H585 V170"/><path class="flow tk" d="M850 170 V215 H585 V170"/>
+      <text class="small" x="718" y="236" text-anchor="middle">inbound liquidity from the swap server</text>
+      <text class="small" x="335" y="200" text-anchor="middle">no channels, no inbound capacity</text>
+    </svg>
+
+    <div class="compare">
+      <div class="panel node-list"><div class="panel-h"><span>with a node</span></div><div class="panel-b"><ul>
+        <li>Open and balance channels</li><li>Source inbound liquidity</li><li>Keep a process online</li></ul></div></div>
+      <div class="panel none"><div class="panel-h"><span>with wavelength</span></div><div class="panel-b"><ul>
+        <li>Buyer: <code>/fund</code> prints an invoice; pay it from the phone app and the sats land in seconds</li>
+        <li>Buyer: <code>/deposit</code> gives an on-chain address for the patient path</li>
+        <li>Seller: aperture mints challenge invoices from a Wavelength wallet instead of lnd</li></ul></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== AGENTS -->
+<section id="agents" aria-labelledby="h-agents">
+  <div class="wrap">
+    <p class="kicker">05 / agents</p>
+    <h2 id="h-agents">Agents pay for their own inference.</h2>
+    <p class="lede">Plenty of agents can pay a Lightning invoice for an API. Here the metered thing is <strong>the model call itself</strong>, priced by the token and settled by the preimage. <a href="https://github.com/lightninglabs/pi-402">pi-402</a> is one example: an extension for the <a href="https://pi.dev">Pi</a> coding agent that registers a paid model provider. Pi is unmodified.</p>
+
+    <div class="cols two" style="margin-top:36px">
+      <div>
+        <ol class="flow-steps">
+          <li><b>First call gets a 402.</b> The provider owns the request path.</li>
+          <li><b>Budget policy checks the quote</b> against a per-request ceiling and a daily cap, before any wallet action.</li>
+          <li><b>The embedded wallet pays</b> the invoice and the credential goes in the cache.</li>
+          <li><b>The request retries and streams back.</b> The agent loop never learns it bought anything.</li>
+        </ol>
+        <p class="note">No API key ever reaches the buyer. The proxy holds the model credential and injects it server-side, so the buyer holds sats and the seller holds the key.</p>
+      </div>
+      <div class="panel" id="budget">
+        <div class="panel-h"><span>budget policy</span><span class="r">whatever you fund is the ceiling</span></div>
+        <div class="panel-b">
+          <div class="bud-in">
+            <div><label for="bFund">funded <span id="bFundV">20,000 sats</span></label><input type="range" id="bFund" min="1000" max="40000" step="500" value="20000"></div>
+            <div><label for="bReq">per-request ceiling <span id="bReqV">5,000 sats</span></label><input type="range" id="bReq" min="500" max="15000" step="500" value="5000"></div>
+            <div><label for="bDay">daily cap <span id="bDayV">12,000 sats</span></label><input type="range" id="bDay" min="1000" max="40000" step="500" value="12000"></div>
+            <div><label for="bModel">model the agent calls (bundle quote)</label>
+              <select id="bModel" style="width:100%;margin-top:4px;background:var(--bg);border:1px solid var(--rule-2);border-radius:3px;padding:7px 9px;font-family:var(--mono);font-size:13px">
+                <option value="2000">GLM-4.7 (2,000 sats)</option>
+                <option value="4000">GLM-5.2 (4,000 sats)</option>
+                <option value="11500" selected>Kimi-K3 (11,500 sats)</option>
+              </select></div>
+          </div>
+          <div class="row" style="margin-top:14px"><button class="btn sm primary" id="bBuy" type="button">Agent calls the model</button><button class="btn sm" id="bReset" type="button">Reset</button></div>
+          <div class="bud-state"><div><small>wallet</small><b id="bWal">20,000</b></div><div><small>spent today</small><b id="bSpent">0</b></div><div><small>402s paid</small><b id="bN">0</b></div></div>
+          <div class="log bud-log" id="bLog" role="log" aria-label="Budget decisions"></div>
+          <p class="hint">Illustrative. Each call hits a fresh 402 for the bundle quote shown. The real policy asserts on the quoted total outflow, not the invoice face value, so swap fees count against the ceiling.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================== RUN -->
+<section id="run" aria-labelledby="h-run">
+  <div class="wrap">
+    <p class="kicker">06 / run it yourself</p>
+    <h2 id="h-run">Bring your own seller.</h2>
+    <p class="lede">There is no hosted endpoint at launch. You run aperture and a price server in front of any OpenAI-compatible upstream, then point a buyer at it. Config below is trimmed from the regtest demo profile; the READMEs have the full steps.</p>
+
+    <div class="run-grid">
+      <div class="panel run-col">
+        <div class="panel-h"><span>seller</span><span class="r">aperture + lightmeter (or meterd) + a Wavelength wallet</span></div>
+        <div class="panel-b">
+          <p class="dim" style="font-size:15px">The model key lives in aperture's environment, never in the buyer's. Challenge invoices come from a Wavelength wallet, so there is no node to run.</p>
+          <div class="rs"><div class="rs-h"><b>1</b> aperture.yaml</div>
+<div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code><span class="c"># challenge invoices come from a Wavelength wallet, not lnd</span>
+listenaddr: "127.0.0.1:8404"
+authenticator:
+  network: "regtest"
+  wavelengthgateway: "http://localhost:10061"
+services:
+  - name: "inference"
+    hostregexp: ".*"
+    pathregexp: "^/v1/.*"
+    address: "inference.baseten.co"   <span class="c"># any OpenAI-compatible upstream</span>
+    protocol: "https"
+    auth: "on"
+    headers:
+      Authorization: "Bearer ${BASETEN_GLM_5_2}"
+    dynamicprice:
+      enabled: true
+      grpcaddress: "127.0.0.1:10025"
+      insecure: true
+      metered: true</code></pre></div></div>
+          <div class="rs"><div class="rs-h"><b>2</b> lightmeter.yaml</div>
+<div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code>listenaddr: "127.0.0.1:10025"
+dbpath: "lightmeter.regtest.db"
+defaultmodel: "moonshotai/Kimi-K3"
+bundletokens: 1000000
+models:
+  "moonshotai/Kimi-K3":
+    inputusdpermtok: 3.00
+    outputusdpermtok: 15.00
+pricing:
+  marginpercent: 25
+  btcusd:
+    staticrate: 100000   <span class="c"># pinned for regtest; 0 polls spot</span></code></pre></div></div>
+          <div class="rs"><div class="rs-h"><b>3</b> start the price server</div>
+<div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code>go build ./cmd/lightmeterd
+./lightmeterd --config lightmeter.yaml</code></pre></div></div>
+          <div class="links"><a href="https://github.com/lightninglabs/aperture">aperture README</a><a href="https://github.com/lightninglabs/lightmeter">lightmeter README</a><a href="https://github.com/lightninglabs/wavelength">wavelength</a></div>
+        </div>
+      </div>
+
+      <div class="panel run-col">
+        <div class="panel-h"><span>buyer</span><span class="r">pi-402 in the Pi coding agent</span></div>
+        <div class="panel-b">
+          <p class="dim" style="font-size:15px">The buyer holds sats, not a key. Point it at the seller's aperture, fund the wallet, pick a model, prompt.</p>
+          <div class="rs"><div class="rs-h"><b>1</b> install and point at the seller</div>
+<div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code>pi install npm:@lightninglabs/pi-402
+export L402_PROXY_URL=http://localhost:8404/v1   <span class="c"># include the /v1 prefix</span></code></pre></div></div>
+          <div class="rs"><div class="rs-h"><b>2</b> inside Pi</div>
+<div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code>/fund 20000                       <span class="c"># invoice; pay it from the Wavelength app</span>
+/model l402-baseten/kimi-k3
+<span class="c"># then prompt as usual. /balance and /receipts show the ledger</span></code></pre></div></div>
+          <div class="rs"><div class="rs-h"><b>3</b> optional budget limits</div>
+<div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code>export PI402_MAX_SAT_PER_REQUEST=...   <span class="c"># per-request ceiling</span>
+export PI402_DAILY_CAP_SAT=...         <span class="c"># daily ceiling</span></code></pre></div></div>
+          <p class="note">Wallet backend env vars (sidecar gateway or embedded WASM) and install alternatives are in the pi-402 README.</p>
+          <div class="links"><a href="https://github.com/lightninglabs/pi-402">pi-402 README</a><a href="https://pi.dev">pi.dev</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="brand" href="#top" style="font-size:20px">sats<b>/</b>token</a>
+        <p class="dim" style="margin-top:12px;max-width:34ch;font-size:15px">Inference sold by the token, paid for with final payments. No accounts, no buyer-side API keys, no cards.</p>
+      </div>
+      <div><h4>Repos</h4><ul>
+        <li><a href="https://github.com/lightninglabs/aperture">aperture</a></li>
+        <li><a href="https://github.com/lightninglabs/lightmeter">lightmeter</a></li>
+        <li><a href="https://github.com/lightninglabs/pi-402">pi-402</a></li>
+        <li><a href="https://github.com/lightninglabs/wavelength">wavelength</a></li></ul></div>
+      <div><h4>Specs</h4><ul>
+        <li><a href="https://docs.lightning.engineering/the-lightning-network/l402">L402</a></li>
+        <li><a href="https://datatracker.ietf.org/doc/draft-httpauth-payment/">Payment HTTP Authentication Scheme (draft)</a></li>
+        <li><a href="https://lightning.engineering/posts/2026-07-21-wavelength-launch/">Wavelength launch post</a></li></ul></div>
+      <div><h4>Elsewhere</h4><ul>
+        <li><a href="https://pi.dev">pi.dev</a></li>
+        <li><a href="https://lightning.engineering">Lightning Labs</a></li></ul></div>
+    </div>
+    <p class="fine">Interactive panels on this page are simulations for teaching. Token counts are estimates, header values are illustrative, and no model runs in your browser. Demo-scale bundles are smaller than the 1,000,000-token default.</p>
+  </div>
+</footer>
+
+<script src="meter.js"></script>
+<script src="sections.js"></script>
+</body>
+</html>

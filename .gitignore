@@ -1,0 +1,7 @@
+# Local working material: the design brief (internal drafts and configs)
+# and the two designs we did not pick. Kept out of the published site.
+brief/
+design-a/
+design-b/
+design-c/
+.DS_Store
