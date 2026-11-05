@@ -392,7 +392,7 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
 listenaddr: "127.0.0.1:8404"
 authenticator:
   network: "regtest"
-  wavelengthgateway: "http://localhost:10061"
+  wavelengthgateway: "https://your-wavelength-gateway.example"   <span class="c"># your gateway; the regtest demo runs one locally</span>
 services:
   - name: "inference"
     hostregexp: ".*"
@@ -430,10 +430,10 @@ pricing:
       <div class="panel run-col">
         <div class="panel-h"><span>buyer</span><span class="r">pi-402 in the Pi coding agent</span></div>
         <div class="panel-b">
-          <p class="dim" style="font-size:15px">The buyer holds sats, not a key. Point it at the seller's aperture, fund the wallet, pick a model, prompt.</p>
+          <p class="dim" style="font-size:15px">The buyer holds sats, not a key. Point it at your seller's aperture, fund the wallet, pick a model, prompt.</p>
           <div class="rs"><div class="rs-h"><b>1</b> install and point at the seller</div>
 <div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code>pi install npm:@lightninglabs/pi-402
-export L402_PROXY_URL=http://localhost:8404/v1   <span class="c"># include the /v1 prefix</span></code></pre></div></div>
+export L402_PROXY_URL=https://your-seller.example/v1   <span class="c"># your seller; include the /v1 prefix</span></code></pre></div></div>
           <div class="rs"><div class="rs-h"><b>2</b> inside Pi</div>
 <div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code>/fund 20000                       <span class="c"># invoice; pay it from the Wavelength app</span>
 /model l402-baseten/kimi-k3
