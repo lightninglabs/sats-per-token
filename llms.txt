@@ -1,0 +1,17 @@
+# pi402
+
+> Pay for AI inference with bitcoin, from inside your coding agent. by Lightning Labs.
+
+pi402 is an extension for the Pi coding agent that registers a paid model provider. The first model call gets an HTTP 402, the embedded wallet pays the invoice over Lightning, and the request retries with the payment as its credential. No accounts, no buyer-side API keys, no cards.
+
+pi402 is part of the L402 platform from Lightning Labs. It uses Aperture (the L402 gateway), Lightmeter (per-token metering and pricing) and Wavelength (a self-custodial wallet with no node to run).
+
+## Links
+
+- Site: https://pi402.tech/
+- Repo: https://github.com/lightninglabs/pi-402
+- Aperture: https://github.com/lightninglabs/aperture
+- Lightmeter: https://github.com/lightninglabs/lightmeter
+- Wavelength: https://github.com/lightninglabs/wavelength
+- L402 spec: https://docs.lightning.engineering/the-lightning-network/l402
+- Lightning Labs: https://lightning.engineering

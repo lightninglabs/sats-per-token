@@ -3,14 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sats Per Token</title>
-<meta name="description" content="Inference sold by the token and settled in sats over Lightning. No accounts, no buyer-side API keys, no cards.">
-<meta name="color-scheme" content="dark light">
+<title>pi402</title>
+<meta name="description" content="pi402 lets a coding agent pay for AI inference with bitcoin over Lightning. No accounts, no buyer-side API keys, no cards. by Lightning Labs.">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://pi402.tech/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="pi402">
+<meta property="og:title" content="pi402">
+<meta property="og:description" content="Pay for AI inference with bitcoin, from inside your coding agent. by Lightning Labs.">
+<meta property="og:url" content="https://pi402.tech/">
+<meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307090b'/%3E%3Cpath d='M6 22 L16 8 L26 22 Z' fill='none' stroke='%23ffc21a' stroke-width='2.5'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Doto:wght@500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:image" content="https://pi402.tech/og-image.png">
+<link rel="stylesheet" href="styles.css?v=73">
 <!-- Pinned three.js. The WebGPU build is only fetched when navigator.gpu exists; otherwise the plain WebGL build loads. -->
 <script type="importmap">
 { "imports": {
@@ -20,15 +28,25 @@
 </script>
 <script>
 /* Apply a stored theme choice before first paint. */
-try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+try { var t = localStorage.getItem("pi402-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<!-- Google Analytics. lightning.engineering loads UA-108063423-1, which Google forwards to the GA4
+     property G-E1ZLVM37H4; this page reports to that GA4 property directly. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-E1ZLVM37H4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-E1ZLVM37H4');
 </script>
 </head>
 <body>
 
-<header class="top">
+<header class="top plate-ink">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="Sats Per Token, top of page">sats<b>/</b>token</a>
-    <nav aria-label="Sections">
+    <a class="brand" href="#top" aria-label="pi402, top of page"><span class="wm">PI<b>402</b></span></a>
+    <a class="byline top-byline" href="https://lightning.engineering">by Lightning Labs</a>
+    <nav id="siteNav" aria-label="Sections">
       <a href="#problem">problem</a>
       <a href="#how">how it works</a>
       <a href="#metering">metering</a>
@@ -37,6 +55,7 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
       <a href="#run">run it</a>
     </nav>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle light and dark theme">theme</button>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="Open menu">menu</button>
   </div>
 </header>
 
@@ -44,15 +63,28 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
 
 <!-- ====================================================== HERO / THE METER -->
 <section class="hero" aria-labelledby="h-hero">
-  <div class="wrap hero-grid">
-    <div class="hero-l">
-      <p class="kicker">inference, metered</p>
-      <h1 id="h-hero">Sats<span class="slash">/</span>token</h1>
-      <p class="sub"><strong>Sell inference by the token, paid in sats (Bitcoin).</strong> The payment is final in seconds, so there are no accounts, no buyer-side API keys, and no cards.</p>
-      <div class="cta">
-        <a class="btn primary" href="#run">Run it yourself</a>
-        <a class="btn" href="#how">How it works</a>
+  <div class="hero-band plate-ink">
+    <canvas id="heroDither" aria-hidden="true"></canvas>
+    <div class="wrap hero-intro">
+    <div class="sec-top"><p class="kicker">pay-per-token inference for agents</p><span class="marks" aria-hidden="true">+ +</span></div>
+    <h1 id="h-hero"><span class="sr-only">pi402</span><span class="wm">PI<b>402</b></span></h1>
+    <div class="hero-copy">
+      <div>
+        <p class="sub"><strong>Pay for AI inference with bitcoin, from inside your coding agent.</strong> The payment is final in seconds, so there are no accounts, no buyer-side API keys, and no cards.</p>
       </div>
+      <div>
+        <p class="sub-2">pi402 is an extension for the Pi coding agent that lets it pay for its own inference. When a model call comes back with a 402, the agent's own wallet pays it over Lightning and the request goes through.</p>
+        <div class="cta">
+          <a class="btn primary" href="#run">Run it yourself</a>
+          <a class="btn" href="#how">How it works</a>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+  <div class="wrap instrument-head"><div class="sec-top instrument-label"><p class="kicker">the meter</p><span class="marks" aria-hidden="true">live simulation</span></div></div>
+  <div class="hero-grid">
+    <div class="hero-l plate-ice">
 
       <div class="panel prompt-box" id="operator">
         <div class="panel-h"><span>operator console</span><span class="r">simulated model</span></div>
@@ -82,7 +114,7 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
     </div>
 
     <div class="hero-r stage-wrap">
-      <div class="panel">
+      <div class="panel plate-ink">
         <div class="stage-top"><span><b>model</b> upstream</span><span><b>aperture</b> 402 + meter</span><span><b>agent</b> buyer</span></div>
         <div class="stage" id="stage" data-phase="idle" role="img" aria-label="Live meter. Tokens stream from the model to the buyer while sats flow back to the seller. The scene reacts to the console on the left.">
           <div class="grid-bg"></div>
@@ -126,14 +158,16 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
 <!-- ====================================================== PROBLEM -->
 <section id="problem" aria-labelledby="h-problem">
   <div class="wrap">
-    <p class="kicker">01 / the problem</p>
-    <h2 id="h-problem">A token is irreversible. A card payment is not.</h2>
-    <p class="lede">Generating a token draws joules from the grid and turns them into heat and part of a response. No message from a card network can reach back and recover that energy. So <strong>if you sell inference on cards, you are a lender, not a merchant.</strong></p>
-
-    <div class="cols two" style="margin-top:36px">
+    <div class="sec-top"><p class="kicker"><b>01</b>the problem</p><span class="marks" aria-hidden="true">+</span></div>
+    <div class="sec-head">
+      <p class="word" aria-hidden="true">PROBLEM</p>
+      <h2 id="h-problem">Inference is irreversible. A card payment is not.</h2>
+    </div>
+    <div class="cols two lede-in gap-cols">
       <div>
+        <p class="lede">Generating inference tokens draws joules from the grid and turns them into heat and part of a response. No message from a card network can reach back and recover that energy. So <strong>if you sell inference on cards, you are a lender, not a merchant.</strong></p>
         <p>You allocate scarce GPU time now, for an amount you do not know in advance, and learn somewhere between 60 and 120 days later whether you were paid. Each familiar barrier is an attempt to underwrite that loan, and the fraud you fail to catch is the default rate.</p>
-        <ol class="ledger" aria-label="Barriers that sellers put in front of buyers">
+        <ol class="ledger defenses" aria-label="Barriers that sellers put in front of buyers" data-tag="fallible defenses">
           <li><div><b>Sign-up wall</b><span>An account before the first token.</span></div></li>
           <li><div><b>Fraud checks</b><span>Invasive verification for a few cents of usage.</span></div></li>
           <li><div><b>Minimum top-up</b><span>You wanted to try a model, not prepay a month.</span></div></li>
@@ -142,20 +176,25 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
         </ol>
       </div>
       <div>
-        <!-- TODO: the $323M figure is still being confirmed. Swap the image and the caption together. -->
         <figure id="fraud-figure">
           <a href="https://x.com/thdxr/status/2092238606987370884"><img src="dax-stripe-fraud.png" width="900" alt="Tweet from Dax (@thdxr), Aug 25, 2026: Stripe has blocked 300M USD worth of fraud for OpenCode in the past few days, with a dashboard showing 323,033,617.04 USD blocked and 8,254,735.82 USD failed." loading="lazy"></a>
           <figcaption>A public screenshot from OpenCode's CEO: Stripe's dashboard showing blocked fraud over a few days. Figure still being confirmed.</figcaption>
         </figure>
-        <p class="pull" style="margin-top:22px">Fallible defenses stand between <em>a payment that can be undone</em> and <em>a product that cannot</em>.</p>
+        <aside class="conclusion" aria-label="The gap">
+          <span class="conclusion-tag">the gap</span>
+          <p class="conclusion-h">Fallible defenses stand between <em>a payment that can be undone</em> and <em>a product that cannot</em>.</p>
+        </aside>
       </div>
     </div>
 
-    <h3 style="margin-top:84px; max-width:34ch">Pick a rail whose properties match the product.</h3>
+    <div class="sub-head">
+      <h3>Pick a payment rail that matches the product.</h3>
+      <p class="lede">Inference is final, impersonal and priced per token, so the rail it is sold on should be too. Cards are none of those things. A Lightning payment is final in seconds, carries no identity and can be as small as a single token.</p>
+    </div>
     <div class="facts">
-      <div class="fact"><div class="big">seconds</div><h3>Final settlement</h3><p>A payment settles within seconds, and settles finally. A preimage either exists or it does not. There is nothing to charge back.</p></div>
-      <div class="fact"><div class="big">0 identity</div><h3>No identity attached</h3><p>Card fraud works because a payment is a claim on a person, which can be borrowed or stolen. A Lightning payment is not a claim on anyone.</p></div>
-      <div class="fact"><div class="big">1 msat</div><h3>Tiny amounts</h3><p>The unit is the millisatoshi, 1/1000 of a sat (about $0.00000079 at the time of writing). You can price a single token.</p></div>
+      <div class="fact"><div class="tag">settles in seconds</div><h3>Final, so nothing can be charged back</h3><p>A payment settles within seconds, and settles finally. A preimage either exists or it does not.</p></div>
+      <div class="fact"><div class="tag">no identity attached</div><h3>Not a claim on a person, so nothing to steal</h3><p>Card fraud works because a payment is a claim on a person, which can be borrowed or stolen. A Lightning payment is not a claim on anyone.</p></div>
+      <div class="fact"><div class="tag">priced in msat</div><h3>Small enough to price a single token</h3><p>The unit is the millisatoshi, 1/1000 of a sat (about $0.00000079 at the time of writing).</p></div>
     </div>
 
     <div class="tl panel" id="timeline">
@@ -189,11 +228,14 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
 </section>
 
 <!-- ====================================================== HOW IT WORKS -->
-<section id="how" aria-labelledby="h-how">
+<section id="how" aria-labelledby="h-how" class="plate-ink">
   <div class="wrap">
-    <p class="kicker">02 / how it works</p>
-    <h2 id="h-how">The payment is the credential.</h2>
-    <p class="lede">The server answers an unpaid request with <strong>HTTP 402</strong>: a macaroon that commits to an invoice's payment hash, plus the invoice. Paying reveals the preimage, and macaroon plus preimage is the credential. A valid credential cannot exist without settlement. No sign-up, no key issuance, no account.</p>
+    <div class="sec-top"><p class="kicker"><b>02</b>how it works</p><span class="marks" aria-hidden="true">+ +</span></div>
+    <div class="sec-head">
+      <p class="word" aria-hidden="true">HANDSHAKE</p>
+      <h2 id="h-how">The payment is the credential.</h2>
+    </div>
+    <div class="sec-lede"><p class="lede">The server answers an unpaid request with <strong>HTTP 402</strong>: a macaroon that commits to an invoice's payment hash, plus the invoice. Paying reveals the preimage, and macaroon plus preimage is the credential. A valid credential cannot exist without settlement. No sign-up, no key issuance, no account.</p></div>
 
     <div class="hs">
       <div class="panel" id="hsPanel">
@@ -220,9 +262,13 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
       </div>
     </div>
 
+    <div class="sub-head">
+      <h3>One 402 accepts two payment schemes: L402 and Stripe's MPP.</h3>
+      <p class="lede">Aperture answers every unpaid request with both offers in a single challenge. A buyer that speaks L402 pays with a macaroon and preimage. A buyer that speaks the Payment HTTP Authentication Scheme (MPP), the IETF draft from Stripe and Tempo, pays the same invoice its own way. A seller reaches both kinds of buyer without choosing.</p>
+    </div>
     <div class="cmp-scroll">
       <table class="cmp">
-        <caption>One 402, two doors. The buyer picks whichever it speaks.</caption>
+        <caption class="sr-only">L402 and MPP compared</caption>
         <thead><tr><th></th><th class="col-l">L402</th><th class="col-m">Payment HTTP Authentication Scheme (MPP)</th></tr></thead>
         <tbody>
           <tr><th>Spec</th><td>L402 on HTTP 402, <a href="https://docs.lightning.engineering/the-lightning-network/l402">docs</a>. A macaroon bound to the invoice's payment hash.</td><td><code>draft-httpauth-payment-00</code>, an IETF <a href="https://datatracker.ietf.org/doc/draft-httpauth-payment/">draft</a> co-authored by Stripe and Tempo. Nearly the same shape.</td></tr>
@@ -233,34 +279,46 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
         </tbody>
       </table>
     </div>
-    <p class="note">pi-402 takes a Payment offer when the seller makes one and falls back to L402. It accepts the <code>charge</code> intent by default; <code>session</code> needs a return-invoice minter that the swap-backed wallet cannot supply yet.</p>
+    <p class="note">pi402 takes a Payment offer when the seller makes one and falls back to L402. It accepts the <code>charge</code> intent by default; <code>session</code> needs a return-invoice minter that the swap-backed wallet cannot supply yet.</p>
   </div>
 </section>
 
 <!-- ====================================================== METERING -->
 <section id="metering" aria-labelledby="h-meter">
   <div class="wrap">
-    <p class="kicker">03 / metering</p>
-    <h2 id="h-meter">Charge for the thing that varies.</h2>
-    <p class="lede">One request costs the seller a few dozen tokens, the next a few thousand, and the seller only learns which once the response is served. So the <strong>payment happens once, up front, for a bundle</strong>, and the <strong>accounting happens per request</strong>, from the usage the upstream actually reported. At 1 msat per input token and 2 msat per output token, that is roughly $0.79 / $1.57 per million tokens at the time of writing.</p>
+    <div class="sec-top"><p class="kicker"><b>03</b>metering</p><span class="marks" aria-hidden="true">+ + +</span></div>
+    <div class="sec-head">
+      <p class="word" aria-hidden="true">METER</p>
+      <h2 id="h-meter">Charge for the thing that varies.</h2>
+    </div>
+    <div class="sec-lede"><p class="lede">One request costs the seller a few dozen tokens, the next a few thousand, and the seller only learns which once the response is served. So the <strong>payment happens once, up front, for a bundle</strong>, and the <strong>accounting happens per request</strong>, from the usage the upstream actually reported. At 1 msat per input token and 2 msat per output token, that is roughly $0.79 / $1.57 per million tokens at the time of writing.</p></div>
 
-    <p class="hint" style="margin-top:18px">The four calls below are the same chips that light up in the meter at the top of the page. Run a completion there and watch them fire.</p>
+    <div class="sub-head">
+      <h3>Four calls between the gateway and the meter.</h3>
+    </div>
     <div class="rpc-table" id="rpcTable" role="list">
       <div class="rpc-item" role="listitem" data-rpc="GetPrice"><span class="n">01</span><span class="nm">GetPrice</span><span class="when">Before aperture mints a 402</span><span class="does">Quotes the bundle price for this request's model.</span></div>
       <div class="rpc-item" role="listitem" data-rpc="ChallengeMinted"><span class="n">02</span><span class="nm">ChallengeMinted</span><span class="when">As the 402 is minted</span><span class="does">Books a bundle against the credential's key, so a balance exists before the payment arrives.</span></div>
       <div class="rpc-item" role="listitem" data-rpc="AuthorizeRequest"><span class="n">03</span><span class="nm">AuthorizeRequest</span><span class="when">On each authenticated request</span><span class="does">Admits or refuses against the balance, and reserves an estimate (the request's <code>max_tokens</code> when it names one).</span></div>
       <div class="rpc-item" role="listitem" data-rpc="ReportUsage"><span class="n">04</span><span class="nm">ReportUsage</span><span class="when">When the response finishes</span><span class="does">Debits the usage the upstream reported, rounded up, and releases the reservation.</span></div>
     </div>
+    <p class="table-note">Aperture asks Lightmeter these four questions for every request. They are the same four chips that light up in the meter at the top of the page; run a completion there and watch them fire in this order.</p>
 
-    <div class="life">
-      <div class="life-card"><div class="no">born</div><p>A bundle is born when the 402 is minted, not when it is paid. An unpaid booking expires after ten minutes.</p></div>
-      <div class="life-card"><div class="no">reserved</div><p>The reservation stops ten concurrent requests from each being admitted against the same last thousand tokens.</p></div>
-      <div class="life-card"><div class="no">debited</div><p>The debit is weighted by direction when the prompt and completion split is known, so output-heavy work pays the output rate.</p></div>
-      <div class="life-card"><div class="no">exhausted</div><p>A request that would overdraw gets a fresh 402 naming the next bundle. Exhaustion, not the credential, ends a bundle.</p></div>
+    <div class="sub-head">
+      <h3>The life of a bundle, in four steps.</h3>
+      <p class="lede">Every payment buys a bundle of tokens. Requests draw it down until it runs out, then the next 402 names a new one. This is what happens to a bundle from first request to last.</p>
     </div>
+    <ol class="life" aria-label="Lifecycle of a bundle">
+      <li class="life-card"><div class="no">born</div><h4>The 402 is minted</h4><p>A bundle exists from the moment the challenge is minted, before it is paid. An unpaid booking expires after ten minutes.</p></li>
+      <li class="life-card"><div class="no">reserved</div><h4>A request is admitted</h4><p>An estimate is held so ten concurrent requests cannot all be admitted against the same last thousand tokens.</p></li>
+      <li class="life-card"><div class="no">debited</div><h4>The response finishes</h4><p>The tokens actually used are debited, weighted by direction, so output-heavy work pays the output rate.</p></li>
+      <li class="life-card"><div class="no">exhausted</div><h4>The bundle runs out</h4><p>A request that would overdraw gets a fresh 402 naming the next bundle. Exhaustion, not the credential, ends a bundle.</p></li>
+    </ol>
 
-    <h3 style="margin-top:72px; max-width:30ch">Aperture ships <code class="mono" style="font-size:.9em">meterd</code>. A real seller wants <a href="https://github.com/lightninglabs/lightmeter" style="text-underline-offset:4px">lightmeter</a>.</h3>
-    <p class="lede" style="margin-top:14px"><code>meterd</code> is the minimal price server: a JSON file of per-model rates. Lightmeter is the reference daemon for a real seller. It knows what each model costs, reads the upstream provider's catalog, tracks the BTC/USD rate, converts dollars per million tokens to msat per token, adds an optional margin, and keeps a SQLite database with an append-only accounting ledger for reconciliation. Try the conversion with the values from the regtest demo config.</p>
+    <div class="sub-head">
+      <h3>How a model's dollar price becomes a price in sats.</h3>
+      <p class="lede">Aperture includes <code>meterd</code>, a minimal price server that reads a JSON file of per-model rates; it is enough for a demo. <a href="https://github.com/lightninglabs/lightmeter">Lightmeter</a> is the production price server. It reads the upstream provider's catalog, tracks the BTC/USD rate, converts dollars per million tokens into msat per token, adds your margin, and keeps an append-only ledger for reconciliation. Try the conversion below with the regtest demo values.</p>
+    </div>
 
     <div class="panel calc" id="calc">
       <div class="panel-h"><span>lightmeter pricing, $/Mtok to msat/token</span><span class="r">regtest demo values</span></div>
@@ -295,32 +353,35 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
 </section>
 
 <!-- ====================================================== WAVELENGTH -->
-<section id="wavelength" aria-labelledby="h-wl">
+<section id="wavelength" aria-labelledby="h-wl" class="plate-orange">
   <div class="wrap">
-    <p class="kicker">04 / wavelength</p>
-    <h2 id="h-wl">No node. No channels. Nothing to keep online.</h2>
-    <p class="lede">Running a Lightning node means channels, inbound liquidity, and a process that has to stay online. Too much to ask of a seller who wants to sell tokens, and far more than you would ask of a wallet living inside a coding agent. <a href="https://lightning.engineering/posts/2026-07-21-wavelength-launch/">Wavelength</a> is an Ark wallet that pays a BOLT11 invoice through a swap server, so both sides skip it.</p>
+    <div class="sec-top"><p class="kicker"><b>04</b>wavelength</p><span class="marks" aria-hidden="true">+</span></div>
+    <div class="sec-head">
+      <p class="word" aria-hidden="true">WALLET</p>
+      <h2 id="h-wl">Pay and get paid without running a node.</h2>
+    </div>
+    <div class="sec-lede"><p class="lede">Agents can now pay for their own inference, and sellers can get paid for it, without a Lightning node on either side. <a href="https://lightning.engineering/posts/2026-07-21-wavelength-launch/">Wavelength</a> is an Ark wallet that pays a BOLT11 invoice through a swap server. That is what lets a wallet live inside a coding agent, and lets a seller accept payment with no channels to open, no inbound liquidity to find and no process to keep online.</p></div>
 
-    <svg class="wl-svg" viewBox="0 0 960 250" role="img" aria-labelledby="wlT wlD">
+    <svg class="wl-svg" viewBox="0 68 960 184" role="img" aria-labelledby="wlT wlD">
       <title id="wlT">Wavelength payment path</title>
       <desc id="wlD">The buyer funds the agent wallet from a phone. The agent pays from its Ark balance through the Wavelength swap server over Lightning. Aperture's seller wallet is credited with inbound liquidity from the swap server. Neither side runs channels or a node.</desc>
-      <rect class="node" x="10" y="80" width="160" height="90" rx="3"/>
-      <text x="90" y="118" text-anchor="middle" font-size="14">phone</text><text class="small" x="90" y="138" text-anchor="middle">Wavelength app</text>
-      <rect class="node hot" x="250" y="80" width="170" height="90" rx="3"/>
-      <text x="335" y="118" text-anchor="middle" font-size="14">agent wallet</text><text class="small" x="335" y="138" text-anchor="middle">Ark, in-process</text>
-      <rect class="node" x="500" y="80" width="170" height="90" rx="3"/>
-      <text x="585" y="118" text-anchor="middle" font-size="14">swap server</text><text class="small" x="585" y="138" text-anchor="middle">Ark to Lightning</text>
-      <rect class="node hot" x="750" y="80" width="200" height="90" rx="3"/>
-      <text x="850" y="118" text-anchor="middle" font-size="14">aperture</text><text class="small" x="850" y="138" text-anchor="middle">seller wallet, no node</text>
-      <path class="wire" d="M170 125 H250"/><path class="flow" d="M170 125 H250"/>
-      <path class="wire" d="M420 125 H500"/><path class="flow" d="M420 125 H500"/>
-      <path class="wire" d="M670 125 H750"/><path class="flow" d="M670 125 H750"/>
-      <text class="small" x="210" y="108" text-anchor="middle">/fund</text>
-      <text class="small" x="460" y="108" text-anchor="middle">pay invoice</text>
-      <text class="small" x="710" y="108" text-anchor="middle">Lightning</text>
-      <path class="wire" d="M850 170 V215 H585 V170"/><path class="flow tk" d="M850 170 V215 H585 V170"/>
-      <text class="small" x="718" y="236" text-anchor="middle">inbound liquidity from the swap server</text>
-      <text class="small" x="335" y="200" text-anchor="middle">no channels, no inbound capacity</text>
+      <rect class="node" x="10" y="80" width="150" height="90" rx="3"/>
+      <text x="85" y="118" text-anchor="middle" font-size="14">phone</text><text class="small" x="85" y="138" text-anchor="middle">Wavelength app</text>
+      <rect class="node hot" x="265" y="80" width="160" height="90" rx="3"/>
+      <text x="345" y="118" text-anchor="middle" font-size="14">agent wallet</text><text class="small" x="345" y="138" text-anchor="middle">Ark, in-process</text>
+      <rect class="node" x="530" y="80" width="160" height="90" rx="3"/>
+      <text x="610" y="118" text-anchor="middle" font-size="14">swap server</text><text class="small" x="610" y="138" text-anchor="middle">Ark to Lightning</text>
+      <rect class="node hot" x="790" y="80" width="160" height="90" rx="3"/>
+      <text x="870" y="118" text-anchor="middle" font-size="14">aperture</text><text class="small" x="870" y="138" text-anchor="middle">seller wallet, no node</text>
+      <path class="wire" d="M160 125 H265"/><path class="flow" d="M160 125 H265"/>
+      <path class="wire" d="M425 125 H530"/><path class="flow" d="M425 125 H530"/>
+      <path class="wire" d="M690 125 H790"/><path class="flow" d="M690 125 H790"/>
+      <text class="small" x="212" y="112" text-anchor="middle">/fund</text>
+      <text class="small" x="477" y="112" text-anchor="middle">pay invoice</text>
+      <text class="small" x="740" y="112" text-anchor="middle">Lightning</text>
+      <path class="wire" d="M870 170 V215 H610 V170"/><path class="flow tk" d="M870 170 V215 H610 V170"/>
+      <text class="small" x="740" y="238" text-anchor="middle">inbound liquidity from the swap server</text>
+      <text class="small" x="345" y="200" text-anchor="middle">no channels, no inbound capacity</text>
     </svg>
 
     <div class="compare">
@@ -335,14 +396,16 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
 </section>
 
 <!-- ====================================================== AGENTS -->
-<section id="agents" aria-labelledby="h-agents">
+<section id="agents" aria-labelledby="h-agents" class="plate-ice">
   <div class="wrap">
-    <p class="kicker">05 / agents</p>
-    <h2 id="h-agents">Agents pay for their own inference.</h2>
-    <p class="lede">Plenty of agents can pay a Lightning invoice for an API. Here the metered thing is <strong>the model call itself</strong>, priced by the token and settled by the preimage. <a href="https://github.com/lightninglabs/pi-402">pi-402</a> is one example: an extension for the <a href="https://pi.dev">Pi</a> coding agent that registers a paid model provider. Pi is unmodified.</p>
-
-    <div class="cols two" style="margin-top:36px">
+    <div class="sec-top"><p class="kicker"><b>05</b>agents</p><span class="marks" aria-hidden="true">+ +</span></div>
+    <div class="sec-head">
+      <p class="word" aria-hidden="true">AGENT</p>
+      <h2 id="h-agents">Agents pay for their own inference.</h2>
+    </div>
+    <div class="cols two lede-in">
       <div>
+        <p class="lede">Plenty of agents can pay a Lightning invoice for an API. Here the metered thing is <strong>the model call itself</strong>, priced by the token and settled by the preimage. <a href="https://github.com/lightninglabs/pi-402">pi402</a> is an extension for the <a href="https://pi.dev">Pi</a> coding agent that registers a paid model provider. Pi is unmodified.</p>
         <ol class="flow-steps">
           <li><b>First call gets a 402.</b> The provider owns the request path.</li>
           <li><b>Budget policy checks the quote</b> against a per-request ceiling and a daily cap, before any wallet action.</li>
@@ -376,11 +439,14 @@ try { var t = localStorage.getItem("spt-theme"); if (t === "light" || t === "dar
 </section>
 
 <!-- ====================================================== RUN -->
-<section id="run" aria-labelledby="h-run">
+<section id="run" aria-labelledby="h-run" class="plate-ink">
   <div class="wrap">
-    <p class="kicker">06 / run it yourself</p>
-    <h2 id="h-run">Bring your own seller.</h2>
-    <p class="lede">There is no hosted endpoint at launch. You run aperture and a price server in front of any OpenAI-compatible upstream, then point a buyer at it. Config below is trimmed from the regtest demo profile; the READMEs have the full steps.</p>
+    <div class="sec-top"><p class="kicker"><b>06</b>run it yourself</p><span class="marks" aria-hidden="true">+ + +</span></div>
+    <div class="sec-head">
+      <p class="word" aria-hidden="true">RUN</p>
+      <h2 id="h-run">Sell your own tokens for sats, on your own infrastructure.</h2>
+    </div>
+    <div class="sec-lede"><p class="lede">pi402 is open source and there is no hosted endpoint, so you keep the model key, the pricing and the revenue. Put Aperture and a price server in front of any OpenAI-compatible model, point pi402 at it, and every request pays you in bitcoin as it is served. The config below is trimmed from the regtest demo profile; the READMEs have the full steps.</p></div>
 
     <div class="run-grid">
       <div class="panel run-col">
@@ -428,7 +494,7 @@ pricing:
       </div>
 
       <div class="panel run-col">
-        <div class="panel-h"><span>buyer</span><span class="r">pi-402 in the Pi coding agent</span></div>
+        <div class="panel-h"><span>buyer</span><span class="r">pi402 in the Pi coding agent</span></div>
         <div class="panel-b">
           <p class="dim" style="font-size:15px">The buyer holds sats, not a key. Point it at your seller's aperture, fund the wallet, pick a model, prompt.</p>
           <div class="rs"><div class="rs-h"><b>1</b> install and point at the seller</div>
@@ -441,8 +507,8 @@ export L402_PROXY_URL=https://your-seller.example/v1   <span class="c"># your se
           <div class="rs"><div class="rs-h"><b>3</b> optional budget limits</div>
 <div class="code"><button class="copy" type="button" data-copy>copy</button><pre><code>export PI402_MAX_SAT_PER_REQUEST=...   <span class="c"># per-request ceiling</span>
 export PI402_DAILY_CAP_SAT=...         <span class="c"># daily ceiling</span></code></pre></div></div>
-          <p class="note">Wallet backend env vars (sidecar gateway or embedded WASM) and install alternatives are in the pi-402 README.</p>
-          <div class="links"><a href="https://github.com/lightninglabs/pi-402">pi-402 README</a><a href="https://pi.dev">pi.dev</a></div>
+          <p class="note">Wallet backend env vars (sidecar gateway or embedded WASM) and install alternatives are in the pi402 README.</p>
+          <div class="links"><a href="https://github.com/lightninglabs/pi-402">pi402 README</a><a href="https://pi.dev">pi.dev</a></div>
         </div>
       </div>
     </div>
@@ -455,27 +521,33 @@ export PI402_DAILY_CAP_SAT=...         <span class="c"># daily ceiling</span></c
   <div class="wrap">
     <div class="foot">
       <div>
-        <a class="brand" href="#top" style="font-size:20px">sats<b>/</b>token</a>
-        <p class="dim" style="margin-top:12px;max-width:34ch;font-size:15px">Inference sold by the token, paid for with final payments. No accounts, no buyer-side API keys, no cards.</p>
+        <a class="brand brand-lg" href="#top"><span class="wm">PI<b>402</b></span></a>
+        <p class="dim" style="margin-top:12px;max-width:34ch;font-size:15px">Pay for AI inference with bitcoin, from inside your coding agent.</p>
+        <p class="byline"><a href="https://lightning.engineering">by Lightning Labs</a></p>
+        <p class="dim" style="margin-top:14px;max-width:38ch;font-size:13.5px">Part of the L402 platform: pi402 is the buyer, Aperture the gateway, Lightmeter the meter, Wavelength the wallet.</p>
       </div>
       <div><h4>Repos</h4><ul>
+        <li><a href="https://github.com/lightninglabs/pi-402">pi402</a></li>
         <li><a href="https://github.com/lightninglabs/aperture">aperture</a></li>
         <li><a href="https://github.com/lightninglabs/lightmeter">lightmeter</a></li>
-        <li><a href="https://github.com/lightninglabs/pi-402">pi-402</a></li>
         <li><a href="https://github.com/lightninglabs/wavelength">wavelength</a></li></ul></div>
       <div><h4>Specs</h4><ul>
         <li><a href="https://docs.lightning.engineering/the-lightning-network/l402">L402</a></li>
         <li><a href="https://datatracker.ietf.org/doc/draft-httpauth-payment/">Payment HTTP Authentication Scheme (draft)</a></li>
         <li><a href="https://lightning.engineering/posts/2026-07-21-wavelength-launch/">Wavelength launch post</a></li></ul></div>
-      <div><h4>Elsewhere</h4><ul>
-        <li><a href="https://pi.dev">pi.dev</a></li>
-        <li><a href="https://lightning.engineering">Lightning Labs</a></li></ul></div>
+      <div><h4>Lightning Labs</h4><ul>
+        <li><a href="https://lightning.engineering">lightning.engineering</a></li>
+        <li><a href="https://docs.lightning.engineering">Builder's Guide</a></li>
+        <li><a href="https://wavelength.money">Wavelength</a></li>
+        <li><a href="https://pi.dev">pi.dev</a></li></ul></div>
     </div>
     <p class="fine">Interactive panels on this page are simulations for teaching. Token counts are estimates, header values are illustrative, and no model runs in your browser. Demo-scale bundles are smaller than the 1,000,000-token default.</p>
+    <p class="fine legal">pi402 is built by <a href="https://lightning.engineering">Lightning Labs</a>, the team behind LND, Lightning Terminal, Wavelength, L402 and Taproot Assets. Lightning is the network; Lightning Labs is the company. © 2026 Lightning Labs.</p>
   </div>
 </footer>
 
-<script src="meter.js"></script>
-<script src="sections.js"></script>
+<script src="meter.js?v=5"></script>
+<script src="sections.js?v=5"></script>
+<script src="dither.js?v=12"></script>
 </body>
 </html>

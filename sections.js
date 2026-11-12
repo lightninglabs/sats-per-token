@@ -1,11 +1,11 @@
-/* Sats Per Token, design A. Interactive sections below the hero:
+/* pi402 site. Interactive sections below the hero:
  * 402 transcript stepper, card vs Lightning scrubber, lightmeter pricing
  * calculator, budget policy demo, and copy buttons. Classic script.
  */
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
-  var reduce = function () { return window.SPT && window.SPT.reduce(); };
+  var reduce = function () { return window.PI402 && window.PI402.reduce(); };
   var fmt = function (n) { return Math.round(n).toLocaleString("en-US"); };
 
   /* ================================================ 402 transcript */
@@ -239,4 +239,14 @@
       catch (e) { done(false); }
     });
   });
+})();
+
+/* mobile menu */
+(function () {
+  var btn = document.getElementById("menuBtn"), nav = document.getElementById("siteNav");
+  if (!btn || !nav) return;
+  function set(open) { nav.classList.toggle("open", open); btn.setAttribute("aria-expanded", String(open)); btn.textContent = open ? "close" : "menu"; }
+  btn.addEventListener("click", function () { set(!nav.classList.contains("open")); });
+  nav.addEventListener("click", function (e) { if (e.target.tagName === "A") set(false); });
+  window.matchMedia("(min-width: 861px)").addEventListener("change", function (m) { if (m.matches) set(false); });
 })();

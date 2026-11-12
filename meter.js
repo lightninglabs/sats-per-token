@@ -1,4 +1,4 @@
-/* Sats Per Token, design A. The hero meter: particle simulation, three.js
+/* pi402 site. The hero meter: particle simulation, three.js
  * renderer (WebGPU with WebGL fallback, then a Canvas2D fallback), and the
  * operator console that drives it. Classic script so it runs from file://.
  *
@@ -18,7 +18,7 @@
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function hex(n) { var s = ""; for (var i = 0; i < n; i++) s += Math.floor(Math.random() * 16).toString(16); return s; }
 
-  window.SPT = {
+  window.PI402 = {
     reduce: function () { return reduce; },
     fmt: fmt,
     onTheme: function (cb) { themeListeners.push(cb); },
@@ -29,16 +29,16 @@
   function effectiveTheme() {
     var a = document.documentElement.getAttribute("data-theme");
     if (a === "light" || a === "dark") return a;
-    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   }
   function themeChanged() { themeListeners.forEach(function (cb) { cb(); }); }
   $("themeBtn").addEventListener("click", function () {
     var next = effectiveTheme() === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", next);
-    try { localStorage.setItem("spt-theme", next); } catch (e) {}
+    try { localStorage.setItem("pi402-theme", next); } catch (e) {}
     themeChanged();
   });
-  window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", themeChanged);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeChanged);
 
   /* ------------------------------------------------------- tokenizer */
   var TOK_RE = /\s*[A-Za-z0-9_]{1,4}|\s*[^\sA-Za-z0-9_]/g;
@@ -87,7 +87,7 @@
   var renderer = null; // { name, resize(w,h), draw(parts,w,h), dispose }
   var cssColors = null;
   function readColors() {
-    var cs = getComputedStyle(document.documentElement);
+    var cs = getComputedStyle(document.getElementById("stage") || document.documentElement);
     cssColors = { tok: cs.getPropertyValue("--tok").trim(), sat: cs.getPropertyValue("--sat").trim() };
   }
   themeListeners.push(function () { cssColors = null; requestStatic(); });
@@ -294,7 +294,7 @@
   } else { visible = true; startRenderer(); }
   document.addEventListener("visibilitychange", function () { setRunning(visible && !document.hidden); });
   window.addEventListener("resize", function () { if (renderer) { lastW = 0; if (reduce) drawNow(); } });
-  window.SPT.onReduce(function (m) {
+  window.PI402.onReduce(function (m) {
     reduce = m || qs.get("reduce") === "1";
     if (reduce) { setRunning(false); requestStatic(); } else { parts.length = 0; setRunning(visible); }
   });
