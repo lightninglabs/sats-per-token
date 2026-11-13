@@ -1,0 +1,264 @@
+/* pi402 site, single-page layout. Loaded after styles.css, which owns the tokens, header, footer and code blocks.
+ * This file owns every section of the page: 402 hero, jump bar, four moments, why-not-cards split,
+ * three reassurances and the two doors with their steps. */
+
+body.v2 { font-size: 16px; }
+body.v2 .lede { font-size: 17px; line-height: 1.5; max-width: 62ch; }
+body.v2 .note { font-size: 15px; }
+body.v2 .ledger span, body.v2 .fact p, body.v2 .annot p, body.v2 .tl-card p, body.v2 .life-card p,
+body.v2 .rpc-item .when, body.v2 .rpc-item .does, body.v2 .flow-steps li, body.v2 .compare li,
+body.v2 .cmp, body.v2 footer li { font-size: 15px; }
+body.v2 .hint, body.v2 .table-note { font-size: 13.5px; color: var(--dim); }
+body.v2 .run-col > .panel-b > p.dim { font-size: 15.5px !important; }
+
+/* header */
+.top nav a[aria-current="page"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--sat); }
+body.v2 .top nav { font-size: 11.5px; }
+
+/* shared display pieces */
+.px { font-family: var(--pixel); font-weight: 900; letter-spacing: -0.02em; }
+.statusline { display: flex; justify-content: space-between; gap: 16px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+.v2-h2 { font-size: clamp(26px, 3vw, 38px); line-height: 1.08; letter-spacing: -0.025em; max-width: 22ch; margin: 0 0 18px; }
+.v2-p { font-size: 17px; line-height: 1.5; color: var(--dim); max-width: 60ch; margin: 0 0 14px; }
+.v2-p strong { color: var(--text); }
+.v2-p a, .lede a, .note a { text-decoration-color: var(--sat); text-underline-offset: 3px; }
+.go {
+  display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; text-decoration: none;
+  background: var(--sat); color: var(--sat-ink); font-weight: 600; font-size: 17px; padding: 15px 24px; min-height: 48px;
+}
+.go:hover { filter: brightness(1.08); }
+.go.line { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+.go.line:hover { background: var(--text); color: var(--bg); filter: none; }
+.go-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.cmd {
+  display: flex; align-items: center; gap: 12px; background: var(--bg-2); border: 1px solid var(--rule-2);
+  padding: 6px 6px 6px 16px; margin-top: 24px; max-width: 560px;
+}
+.cmd pre { flex: 1 1 auto; min-width: 0; margin: 0; overflow-x: auto; white-space: nowrap; font-size: 14.5px; color: var(--text); }
+.cmd .copy { position: static; font-size: 13px; padding: 11px 16px; min-height: 44px; background: var(--sat); border-color: var(--sat); color: var(--sat-ink); font-weight: 600; }
+
+/* ---------- home hero: the status code ---------- */
+section.h402, section.phero { position: relative; overflow: hidden; border: 0; padding: clamp(40px, 5vw, 64px) 0 clamp(56px, 6vw, 84px); }
+section.h402 > canvas, section.phero > canvas { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; image-rendering: pixelated; }
+section.h402 > .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 44px 64px; }
+.h402-l { flex: 1 1 460px; min-width: 0; }
+.big402 { font-size: clamp(150px, 27vw, 340px); line-height: 0.82; color: var(--sat); margin: 6px 0 4px -0.04em; }
+.h402 h1 { font-size: clamp(34px, 4.4vw, 56px); line-height: 1.03; letter-spacing: -0.03em; margin: 22px 0 0; max-width: 16ch; }
+.h402 .v2-p { font-size: clamp(17px, 1.6vw, 20px); margin-top: 18px; color: var(--text); opacity: 0.86; max-width: 34em; }
+
+.receipt {
+  flex: 0 1 350px; min-width: 0; background: var(--paper); color: var(--paper-ink); font-family: var(--mono); font-size: 14px; line-height: 1.55;
+  padding: 24px 22px 26px; transform: rotate(2.5deg); box-shadow: 8px 8px 0 var(--sat); margin: 12px 18px 12px 6px;
+}
+.receipt-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; border-bottom: 1px dashed var(--paper-ink); padding-bottom: 12px; margin-bottom: 12px; }
+.receipt-h b { font-family: var(--pixel); font-weight: 900; font-size: 26px; }
+.receipt-h span { font-size: 11px; color: #6B6359; text-align: right; }
+.receipt dl { margin: 0; }
+.receipt dl div { display: flex; justify-content: space-between; gap: 12px; }
+.receipt dt, .receipt dd { margin: 0; }
+.receipt .total { border-top: 1px dashed var(--paper-ink); border-bottom: 1px dashed var(--paper-ink); margin: 12px 0; padding: 12px 0; font-weight: 600; font-size: 18px; }
+.receipt-f { margin: 16px 0 0; text-align: center; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6359; }
+@media (max-width: 760px) { .receipt { transform: rotate(1.2deg); margin-inline: 4px 14px; } }
+
+/* ---------- the two doors ---------- */
+section.doors-sec { padding: 0; border: 0; }
+.doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); position: relative; z-index: 1; }
+.dcard { padding: clamp(40px, 4.5vw, 56px) clamp(20px, 5vw, 64px) clamp(44px, 5vw, 64px); display: flex; flex-direction: column; gap: 14px; }
+.dcard.buy { background: var(--buy-bg); color: var(--buy-text); }
+.dcard.sell { background: var(--sell-bg); color: var(--sell-text); }
+.dcard .statusline { color: inherit; opacity: 0.75; }
+.dcard .dword { font-size: clamp(96px, 13vw, 168px); line-height: 0.9; margin-left: -0.04em; }
+.dcard h2 { font-size: clamp(24px, 2.6vw, 32px); line-height: 1.12; letter-spacing: -0.02em; max-width: 17em; margin: 0; }
+.dcard p { font-size: 18px; line-height: 1.45; max-width: 27em; margin: 0; }
+.dcard .go { background: var(--btn-bg); color: var(--btn-text); margin-top: 12px; }
+.dcard .go:hover { filter: brightness(1.12); }
+
+/* ---------- one request, four moments ---------- */
+.moments-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 28px; }
+.moments-h .v2-h2 { margin: 0; }
+.moments { display: grid; grid-template-columns: minmax(0, 1fr); border: 1px solid var(--rule-2); list-style: none; margin: 0; padding: 0; }
+.moments li { padding: 24px; border-right: 1px solid var(--rule-2); border-bottom: 1px solid var(--rule-2); margin: 0 -1px -1px 0; display: flex; flex-direction: column; gap: 10px; }
+@media (min-width: 560px) { .moments { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 940px) { .moments { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.moments .n { font-size: 64px; line-height: 1; }
+.moments code { font-size: 13px; color: var(--dim); }
+.moments p { margin: 0; font-size: 18px; line-height: 1.35; }
+.moments .c-sat .n, .moments .c-sat code { color: var(--sat); }
+.moments .c-tok .n, .moments .c-tok code { color: var(--tok); }
+
+/* ---------- jump bar under the hero ---------- */
+section.jump { padding: 0; border: 0; border-block: 1px solid var(--rule-2); }
+.jump .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding-block: 20px; }
+.jump .go { padding: 13px 22px; }
+.jump .go.ice { background: var(--sell-bg); color: var(--sell-text); }
+.jump span { font-size: 16px; color: var(--dim); }
+
+/* ---------- why not cards: 120 days vs seconds ---------- */
+section.why { padding-bottom: 0; }
+.why .statusline { margin-bottom: 14px; }
+.why .v2-h2 { font-size: clamp(30px, 3.6vw, 46px); }
+.why .v2-p { font-size: clamp(17px, 1.6vw, 20px); }
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); margin-top: clamp(28px, 4vw, 44px); position: relative; z-index: 1; }
+.half { padding: clamp(32px, 4vw, 44px) clamp(20px, 5vw, 64px); display: flex; flex-direction: column; gap: 10px; }
+.half.card { background: var(--card-bg); color: var(--text); }
+.half.ln { background: var(--buy-bg); color: var(--buy-text); }
+.half .statusline { color: inherit; opacity: 0.75; }
+.half .word { font-size: clamp(56px, 9vw, 112px); line-height: 0.9; }
+.half p { margin: 0; font-size: clamp(18px, 2vw, 22px); font-weight: 600; }
+
+/* ---------- three reassurances ---------- */
+.assure { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 32px 40px; list-style: none; margin: 0; padding: 0; }
+.assure li { border-top: 1px solid var(--rule-2); padding-top: 16px; }
+.assure .word { font-size: clamp(40px, 4.4vw, 52px); line-height: 0.95; }
+.assure h3 { font-size: 21px; line-height: 1.2; margin: 10px 0 8px; }
+.assure p { font-size: 16.5px; line-height: 1.5; color: var(--dim); margin: 0; }
+
+/* ---------- three steps inside each door ---------- */
+.dcard { min-width: 0; }
+.dsteps { list-style: none; margin: 6px 0 0; padding: 0; }
+.dsteps li { display: flex; gap: 16px; align-items: flex-start; padding: 16px 0; border-top: 1px solid currentColor; }
+.dsteps .n { flex: 0 0 60px; font-size: 46px; line-height: 0.9; }
+.dsteps li > div { flex: 1 1 auto; min-width: 0; }
+.dsteps h3 { font-size: 20px; line-height: 1.2; margin: 0 0 8px; }
+.dsteps p { font-size: 15.5px; margin: 8px 0 0; max-width: none; }
+.dsteps p code { font-size: 13.5px; overflow-wrap: anywhere; }
+.dsteps a { color: inherit; }
+.dcard .code pre { background: var(--code-bg); color: var(--code-text); border: 0; font-size: 14px; padding: 14px 72px 14px 16px; }
+.dcard .copy { top: 8px; right: 8px; font-size: 12px; padding: 6px 10px; background: transparent; border-color: currentColor; color: var(--code-text); opacity: 0.8; }
+.dcard .go-row { margin-top: 12px; }
+.dcard .go-row .go { margin-top: 0; }
+
+/* ---------- section tones: the page follows the theme, alternate bands use --bg-2 ---------- */
+section.alt { background: var(--bg-2); }
+.assure .word { color: var(--sat); }
+
+/* ---------- wavelength: Lightning without running Lightning ---------- */
+.wl .statusline { margin-bottom: 14px; }
+.wl .v2-h2 { font-size: clamp(30px, 3.6vw, 46px); max-width: 20ch; }
+.wl .v2-p { font-size: clamp(17px, 1.6vw, 20px); }
+.wl-cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 20px; margin-top: clamp(28px, 4vw, 44px); }
+.wl-col { padding: 26px 26px 22px; border: 1px solid var(--rule-2); background: var(--bg); }
+.wl-col.yes { background: var(--sell-bg); color: var(--sell-text); border-color: transparent; }
+.wl-col .word { font-size: clamp(30px, 3.4vw, 40px); line-height: 1; margin: 10px 0 14px; }
+.wl-col ul { list-style: none; margin: 0; padding: 0; }
+.wl-col li { padding: 12px 0; border-top: 1px solid var(--rule-2); font-size: 17px; line-height: 1.45; }
+.wl-col.yes li { border-top-color: currentColor; }
+.wl-col.no li b { text-decoration: line-through; text-decoration-color: var(--sat); text-decoration-thickness: 2px; }
+.wl-col li b { display: block; font-size: 19px; }
+.wl-col li span { color: var(--dim); }
+.wl-col.yes li span { color: inherit; opacity: 0.8; }
+.wl-col code { font-size: 0.88em; }
+.wl-path { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; list-style: none; margin: clamp(32px, 4vw, 48px) 0 0; padding: 0; border: 1px solid var(--rule-2); }
+.wl-path li { padding: 20px 22px; border-bottom: 1px solid var(--rule-2); position: relative; }
+.wl-path li:last-child { border-bottom: 0; }
+.wl-path .word { font-size: 28px; line-height: 1; }
+.wl-path li.hot .word { color: var(--sat); }
+.wl-path p { margin: 6px 0 0; font-size: 15.5px; color: var(--dim); }
+.wl-path small { display: block; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sat); margin-bottom: 8px; }
+@media (min-width: 860px) {
+  .wl-path { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .wl-path li { border-bottom: 0; border-right: 1px solid var(--rule-2); }
+  .wl-path li:last-child { border-right: 0; }
+}
+.wl-why { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 28px 40px; list-style: none; margin: clamp(32px, 4vw, 48px) 0 0; padding: 0; }
+.wl-why h3 { font-size: 21px; line-height: 1.2; margin: 0 0 8px; }
+.wl-why p { font-size: 16.5px; line-height: 1.5; color: var(--dim); margin: 0; }
+.wl .go-row { margin-top: 32px; }
+
+/* ---------- pixel type is for the 402, the logo and the two door words only ---------- */
+.moments .n { font-family: var(--mono); font-weight: 500; font-size: 34px; letter-spacing: -0.02em; }
+.dsteps .n { flex: 0 0 40px; font-family: var(--mono); font-weight: 500; font-size: 24px; line-height: 1.1; opacity: 0.7; }
+.assure .word, .wl-col .word, .wl-path .word, .half .word { font-family: var(--sans); font-weight: 600; letter-spacing: -0.03em; text-transform: none; }
+.assure .word { font-size: clamp(28px, 3vw, 36px); line-height: 1.05; }
+.wl-col .word { font-size: clamp(28px, 3vw, 36px); }
+.wl-path .word { font-size: 24px; letter-spacing: -0.02em; }
+.half .word { font-size: clamp(52px, 7.5vw, 96px); line-height: 0.95; letter-spacing: -0.045em; }
+.receipt-h b { font-family: var(--mono); font-weight: 600; font-size: 17px; letter-spacing: 0.12em; }
+.dcard .dword { font-size: clamp(80px, 10vw, 136px); margin-left: 0; }
+
+/* ---------- full-bleed halves line up with the page column ---------- */
+.doors, .split { grid-template-columns: minmax(0, 1fr); }
+.dcard, .half { padding-inline: var(--gutter); }
+@media (min-width: 760px) {
+  .doors, .split { grid-template-columns: repeat(2, minmax(0, 1fr)); --edge: max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter))); --mid: clamp(28px, 4vw, 56px); }
+  .doors > :first-child, .split > :first-child { padding-left: var(--edge); padding-right: var(--mid); }
+  .doors > :last-child, .split > :last-child { padding-left: var(--mid); padding-right: var(--edge); }
+}
+
+/* ---------- doors, tidy pass: green buy, red sell, rows shared across both cards ---------- */
+.jump .go.buy { background: var(--buy-bg); color: var(--buy-text); box-shadow: inset 0 0 0 1px var(--buy-ink); }
+.jump .go.sell { background: var(--sell-bg); color: var(--sell-text); box-shadow: inset 0 0 0 1px var(--sell-ink); }
+.wl-col.yes { background: var(--buy-bg); color: var(--buy-text); }
+/* the door words keep the pixel face, toned down: lighter weight, smaller, in the door's own colour */
+.dcard .dword { font-family: var(--pixel); font-weight: 600; font-size: clamp(56px, 6.5vw, 84px); line-height: 1; letter-spacing: 0.02em; margin: 12px 0 16px; }
+.dcard.buy .dword { color: var(--buy-ink); }
+.dcard.sell .dword { color: var(--sell-ink); }
+.dcard h2 { margin-bottom: 22px; }
+
+/* each card is 7 rows (label, word, headline, three steps, links); subgrid keeps the rows level */
+.doors { row-gap: 0; }
+.dcard { display: grid; grid-template-rows: subgrid; grid-row: span 7; gap: 0; align-content: start; }
+.dsteps { display: contents; }
+.dsteps li { align-items: flex-start; }
+.dcard .go-row { margin-top: 0; padding-top: 24px; align-self: start; border-top: 1px solid currentColor; }
+
+/* commands wrap instead of scrolling, and never run under the copy button */
+.dcard .code pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: visible; padding: 14px 72px 14px 16px; line-height: 1.6; font-size: 13px; }
+.dcard .code pre code { white-space: inherit; }
+.dcard .copy { top: 10px; right: 10px; padding: 5px 8px; }
+.dcard .code { background: var(--code-bg); }
+.dcard .code pre { background: transparent; }
+@media (max-width: 560px) {
+  .dcard .copy { position: static; display: block; margin: 0 0 0 auto; transform: translate(-10px, 10px); }
+  .dcard .code pre { padding: 14px 16px; font-size: 13px; }
+}
+
+/* ---------- why not cards: one claim, the barriers as chips, the proof ---------- */
+.why-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px clamp(32px, 5vw, 72px); align-items: center; }
+@media (min-width: 900px) { .why-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 24px 0 0; padding: 0; }
+.chips li { font-size: 15px; padding: 7px 12px; border: 1px solid var(--rule-2); color: var(--dim); }
+.proof { margin: 0; }
+/* the screenshot is 1206px wide; it is shown at 420px at most so it stays sharp on any screen */
+.proof { max-width: 444px; justify-self: center; width: 100%; }
+.proof a { display: block; background: #000; padding: 12px; border-radius: 22px; border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.2), 0 14px 32px -12px rgba(0, 0, 0, 0.45); }
+.proof img { display: block; width: 100%; height: auto; border-radius: 12px; }
+.proof figcaption { font-size: 14.5px; line-height: 1.5; color: var(--dim); margin-top: 14px; text-align: center; }
+.chips-h { font-size: 15px; color: var(--dim); margin: 22px 0 0; }
+.chips-h + .chips { margin-top: 10px; }
+
+/* ---------- how it works as a flow: green boxes are the agent, red boxes are the seller ---------- */
+.moments.flow { border: 0; grid-template-columns: minmax(0, 1fr); gap: 40px; }
+.moments.flow li { position: relative; margin: 0; border: 0; padding: 22px 24px 24px; gap: 8px; }
+.moments.flow li.a { background: var(--buy-bg); color: var(--buy-text); }
+.moments.flow li.s { background: var(--sell-bg); color: var(--sell-text); }
+.moments.flow small { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+.moments.flow li.a small, .moments.flow li.a .n { color: var(--buy-ink); }
+.moments.flow li.s small, .moments.flow li.s .n { color: var(--sell-ink); }
+.moments.flow code { color: inherit; opacity: 0.75; }
+.moments.flow li:not(:last-child)::after { content: "\2193"; position: absolute; left: 0; right: 0; bottom: -34px; text-align: center; font-size: 22px; line-height: 28px; color: var(--dim); }
+@media (min-width: 940px) {
+  .moments.flow { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 44px; }
+  .moments.flow li:not(:last-child)::after { content: "\2192"; left: auto; right: -36px; bottom: auto; top: 50%; width: 28px; margin-top: -14px; }
+}
+
+/* the screenshot follows the theme: light frame by day, black frame by night */
+.proof a { background: #fff; border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(0, 0, 0, 0.08), 0 1px 2px rgba(60, 45, 30, 0.12), 0 14px 32px -14px rgba(60, 45, 30, 0.35); }
+.proof .shot-dark { display: none; }
+:root[data-theme="dark"] .proof a { background: #000; border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.2), 0 14px 32px -12px rgba(0, 0, 0, 0.45); }
+:root[data-theme="dark"] .proof .shot-dark { display: block; }
+:root[data-theme="dark"] .proof .shot-light { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .proof a { background: #000; border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), inset 0 -1px 0 rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.2), 0 14px 32px -12px rgba(0, 0, 0, 0.45); }
+  :root:not([data-theme="light"]) .proof .shot-dark { display: block; }
+  :root:not([data-theme="light"]) .proof .shot-light { display: none; }
+}
+
+/* node vs wallet: both cards share 5 rows (label, title, three items) so the items sit level */
+.wl-cmp { row-gap: 0; }
+.wl-col { display: grid; grid-template-rows: subgrid; grid-row: span 5; margin-bottom: 20px; }
+.wl-col ul { display: contents; }

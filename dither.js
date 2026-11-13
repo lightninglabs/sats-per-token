@@ -62,7 +62,7 @@
   function heroBand(now) {
     var cv = document.getElementById("heroDither"); if (!cv) return;
     var root = cv.parentNode;
-    var ink = resolve(root, "--pl-ink-bg"), sat = resolve(root, "--sat"), bg = resolve(root, "--bg"),
+    var ink = resolve(root, "--bg"), sat = resolve(root, "--sat"), bg = ink,   // the hero follows the page theme
         slate = resolve(root, "--pl-ice-bg"), tok = resolve(root, "--tok"), ink2 = resolve(root, "--pl-ink-3"), dust = resolve(root, "--dust");
     var T = now / 1000; // seconds
     function cloud(cx, cy, rad, amp) { return function (t, u) { var dx = (u - cx) * 2.4, dy = t - cy; return amp * (1 - ss(rad * 0.35, rad, Math.sqrt(dx * dx + dy * dy))); }; }
